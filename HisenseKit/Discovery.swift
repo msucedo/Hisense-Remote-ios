@@ -41,7 +41,8 @@ public enum Discovery {
         conn.stateUpdateHandler = { state in
             switch state {
             case .ready: finish(true)
-            case .failed, .cancelled: finish(false)
+            // .waiting = rechazado o bloqueado (p. ej. sin permiso de Red local en iOS).
+            case .failed, .cancelled, .waiting: finish(false)
             default: break
             }
         }

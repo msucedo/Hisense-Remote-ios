@@ -3,3 +3,5 @@ secrets/
 .build/
 hisensectl
 DerivedData/
+*.p12
+xcuserdata/

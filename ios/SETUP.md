@@ -10,19 +10,23 @@ sudo xcode-select -s /Applications/Xcode.app
 ```
 (Para volver a las Command Line Tools en tus otros proyectos: `sudo xcode-select -s /Library/Developer/CommandLineTools`.)
 
+## 1b. Instalar la plataforma iOS en Xcode (una vez, ~8 GB)
+Xcode trae cada plataforma por separado. Sin la de iOS no se puede compilar para iPhone
+(error "iOS 18.2 is not installed"). Instálala con **Xcode → Settings → Components → iOS 18.2 → Get**
+o en la terminal: `xcodebuild -downloadPlatform iOS`.
+
 ## 2. Crear el proyecto
-1. Xcode → **File → New → Project… → iOS → App**.
+1. Xcode → **File → New → Project…** → en la fila de pestañas de arriba elige **iOS** (no
+   macOS ni Multiplatform) → **App**. Si eliges macOS, sale una app de Mac (con
+   `SDKROOT = macosx` y App Sandbox), el iPhone no aparece como destino y truena con
+   "No such module 'RemoteKit'".
 2. Product Name: `HisenseRemote`. Interface: **SwiftUI**. Language: **Swift**.
 3. Guárdalo donde quieras (p. ej. dentro de `hisense-remote-ios/`).
 
-## 3. Meter el código de la app
-En el proyecto nuevo, Xcode generó `HisenseRemoteApp.swift` y `ContentView.swift`.
-- **Borra** esos dos generados (o reemplaza su contenido) y **agrega** los tres de la carpeta `ios/` de este repo:
-  - `HisenseRemoteApp.swift`
-  - `ContentView.swift`
-  - `RemoteViewModel.swift`
-  (Arrástralos al proyecto, marca *Copy items if needed* y que pertenezcan al target.)
-- Debe quedar **un solo** `@main` (el de `HisenseRemoteApp.swift`).
+## 3. El código de la app
+El proyecto ya existe en `HisenseRemote/` y su código vive en `HisenseRemote/HisenseRemote/`
+(`HisenseRemoteApp.swift`, `ContentView.swift`, `RemoteViewModel.swift`). Esa carpeta es la
+fuente única: Xcode 16 incluye automáticamente todo lo que haya dentro.
 
 ## 4. Agregar el paquete RemoteKit (trae SwiftNIO/NIOSSL)
 - **File → Add Package Dependencies… → Add Local…** y elige la carpeta raíz del repo
@@ -30,8 +34,9 @@ En el proyecto nuevo, Xcode generó `HisenseRemoteApp.swift` y `ContentView.swif
 - Agrega el producto **`RemoteKit`** al target de la app. Xcode descargará swift-nio y swift-nio-ssl solo.
 
 ## 5. Meter el certificado al bundle
-- Arrastra `secrets/client.p12` al proyecto. Marca *Copy items if needed* y el target de la app.
-- Debe quedar con el nombre **`client.p12`** (el código lo busca así).
+- Copia `secrets/client.p12` **dentro de `HisenseRemote/HisenseRemote/`** (junto a los `.swift`).
+  Si queda un nivel arriba, Xcode no lo mete en la app y la TV rechaza la conexión.
+- Debe llamarse **`client.p12`** (el código lo busca así). `*.p12` está en `.gitignore`.
 
 ## 6. Permiso de red local
 En el target → pestaña **Info** (Custom iOS Target Properties), agrega una fila:

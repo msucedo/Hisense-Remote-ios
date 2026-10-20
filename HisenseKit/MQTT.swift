@@ -154,6 +154,7 @@ final class MQTTClient {
             let sslContext = try NIOSSLContext(configuration: cfg)
 
             let bootstrap = ClientBootstrap(group: group)
+                .connectTimeout(.seconds(5))   // si no conecta en 5 s, falla en vez de colgarse
                 .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
                 .channelInitializer { channel in
                     do {

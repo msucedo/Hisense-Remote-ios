@@ -7,7 +7,7 @@ struct HisenseRemoteApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(vm)
-                .onAppear { vm.scan() }
+                .onAppear { vm.start() }
         }
     }
 }

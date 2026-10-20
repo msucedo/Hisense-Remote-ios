@@ -19,10 +19,12 @@ struct ContentView: View {
 
     private var scanning: some View {
         VStack(spacing: 16) {
-            ProgressView().tint(.white)
-            Text(vm.status).foregroundStyle(.secondary)
-            Button("Reintentar") { vm.scan() }.buttonStyle(.bordered).tint(.white)
-        }
+            if vm.busy { ProgressView().tint(.white) }
+            Text(vm.status).foregroundStyle(.secondary).multilineTextAlignment(.center)
+            if !vm.busy {
+                Button("Buscar de nuevo") { vm.scan() }.buttonStyle(.bordered).tint(.white)
+            }
+        }.padding(32)
     }
 
     private var pickTV: some View {
