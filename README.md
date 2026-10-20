@@ -34,7 +34,9 @@ Apple firma las transacciones y la app las verifica en el teléfono.
 
 ## Requisitos
 
-- Xcode 16 con la plataforma iOS instalada, y un iPhone con iOS 18.
+- **Xcode 26 o más nuevo** (SDK de iOS 26) con la plataforma iOS instalada. App Store Connect ya
+  no acepta builds hechos con Xcode 16. Xcode 26.3 necesita macOS Sequoia 15.6+.
+- Un iPhone con iOS 18.2 o más nuevo (la versión mínima de la app sigue siendo 18.2).
 - Una Apple ID para firmar (la gratuita sirve; la app caduca a los ~7 días y se renueva corriéndola de nuevo).
 - El iPhone y la tele en el mismo WiFi.
 

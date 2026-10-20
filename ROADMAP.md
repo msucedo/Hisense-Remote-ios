@@ -29,6 +29,20 @@ Lo que ya está resuelto del protocolo (detalles en el código y en `../hisense-
 - **TLS:** el de Apple (Network.framework) falla el handshake de esta TV (`-9858`). Se resolvió con
   **SwiftNIO + NIOSSL** (BoringSSL): conexión 100% confiable.
 
+## ⏸️ Pendiente ahora (2026-10-20): recompilar con el SDK de iOS 26
+
+App Store Connect rechazó el build 1: *"This app was built with the iOS 18.2 SDK. All iOS and iPadOS
+apps must be built with the iOS 26 SDK or later"*. La Mac tiene macOS 15.0.1 y Xcode 16.2, y ningún
+Xcode 26 corre ahí. Plan completo en `appstore/PLAN-SDK26.md`.
+
+1. **Tú:** Ajustes del Sistema ▸ Actualización de software ▸ **macOS Sequoia 15.8.1** (no la 27).
+2. **Tú:** bajar **Xcode 26.3** (`.xip`) de https://developer.apple.com/download/all/ y dejarlo como
+   `/Applications/Xcode-26.3.app` (convive con el 16.2). Abrirlo una vez para que instale la plataforma iOS.
+3. **Claude:** compilar con `DEVELOPER_DIR=/Applications/Xcode-26.3.app/Contents/Developer`, corregir
+   lo que rompa Swift 6.2 o las dependencias NIO, revisar el estilo Liquid Glass en el simulador,
+   correr `StoreTests` y subir el build a **2**.
+4. **Tú:** Run en el iPhone, **Archive ▸ Upload** del build 2 y mandar la 1.0 con la compra in-app.
+
 ## Estructura del repo
 
 | Carpeta | Qué es |
@@ -44,6 +58,7 @@ Lo que ya está resuelto del protocolo (detalles en el código y en `../hisense-
 ## Cómo retomar
 
 - **Compilar el núcleo/CLI:** `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift build`
+  (cuando esté instalado, usar `/Applications/Xcode-26.3.app/...`: para subir a la App Store se necesita Xcode 26+)
   (las Command Line Tools solas no bastan; así no hace falta cambiar `xcode-select`).
 - **Probar la TV desde la terminal:** `.build/debug/hisensectl ping 192.168.100.5`.
   Si responde "conexión cerrada", primero revisa que la TV esté encendida (`ping 192.168.100.5`).

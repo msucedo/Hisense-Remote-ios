@@ -70,6 +70,7 @@ App Store Connect ▸ tu app ▸ **Monetización ▸ Compras dentro de la app �
 | Compartir en familia | Recomendado **activado**. ⚠️ Una vez activado ya no se puede desactivar. |
 | Nombre visible (es-MX) | `Versión completa` |
 | Descripción (es-MX, 55) | `Abre tus apps con un toque y lo que venga después.` |
+| Imagen (1024×1024) | `appstore/iap-version-completa.png` (se regenera con `swift tools/make-iap-image.swift`; Apple no acepta capturas aquí) |
 | Captura para revisión | Captura de la hoja "Versión completa" (botón ★ arriba a la derecha) |
 | Notas de revisión | `Unlocks the "Apps" section (launch TV apps with one tap). Tap "★ Versión completa" at the top right of any screen — it is reachable without a TV.` |
 
@@ -105,6 +106,17 @@ The developer is authorized by Hisense to use the Hisense name and the client ce
 
 ## Capturas de pantalla
 
+Ya están hechas (capturas reales del simulador, en modo demo):
+
+| Ranura en App Store Connect | Tamaño | Carpeta |
+|---|---|---|
+| iPhone 6.3" (16 Pro, 15 Pro…) | 1206×2622 | `appstore/screenshots/6.3/` |
+| iPhone 6.9" (16 Pro Max…) | 1320×2868 | `appstore/preview/frames/` (sube 01, 02 y 03) |
+
+Si App Store Connect dice "las dimensiones del archivo no son válidas", la captura es de otra ranura.
+Para regenerar las de 6.3": `SIM="iPhone 16 Pro" tools/capture-preview.sh appstore/screenshots/6.3`.
+
+
 - Obligatorias: **iPhone 6.9"** (1320×2868, por ejemplo iPhone 16 Pro Max) **o 6.5"** (1284×2778).
   Si tu iPhone es de otro tamaño, App Store Connect acepta capturas de 6.9" y las escala a los demás.
 - Sugeridas (3 a 5): buscando la tele / pantalla del PIN / control con el D-pad / sección de Apps.
@@ -127,6 +139,24 @@ que App Store Connect exige aunque no suene). Usa capturas reales de la app, com
   Las frases, tiempos y toques están al inicio de `tools/make-preview.swift` (sección "Guion").
   El modo demo vive en `HisenseRemote/HisenseRemote/Demo.swift` y solo existe en builds DEBUG.
 - Las capturas de `appstore/preview/frames/` (1320×2868) sirven también como screenshots de 6.9".
+
+## Encabezado horizontal (sección de "componentes")
+
+No es lo mismo que el App Preview: esa sección pide **5244×2950** o **3840×1646**
+(un archivo de 886×1920 ahí da "las dimensiones del archivo no son válidas").
+Hay versión animada y fija en `appstore/preview/`:
+
+| Archivo | Qué es |
+|---|---|
+| `header-3840x1646.mp4` | video H.264, 22 s |
+| `header-5244x2950.mp4` | video HEVC (H.264 no llega a ese ancho), 22 s |
+| `header-3840x1646.png`, `header-5244x2950.png` | imagen fija, por si la sección solo acepta imágenes |
+
+Se regeneran pasando el tamaño (y `.png` para la imagen fija):
+```
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift tools/make-preview.swift \
+    appstore/preview/frames appstore/preview/header-3840x1646.mp4 3840x1646
+```
 
 ## Video para el revisor
 

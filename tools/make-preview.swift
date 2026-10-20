@@ -1,11 +1,14 @@
-// Genera el App Preview de la App Store (el video que se reproduce arriba de la ficha):
-// 886×1920 vertical, 30 fps, H.264 + pista de audio AAC en silencio (App Store Connect
-// rechaza videos sin audio). Arma el video con las capturas reales de la app que saca
-// tools/capture-preview.sh y les pone encima textos, toques y transiciones.
+// Genera los videos de la ficha de la App Store a partir de las capturas reales de la app
+// (las saca tools/capture-preview.sh), con textos, toques y transiciones encima:
+//   • App Preview, vertical 886×1920 (el valor por defecto).
+//   • Encabezado horizontal (5244×2950 o 3840×1646): teléfono a la derecha, textos a la izquierda.
+// 30 fps + pista de audio AAC en silencio (App Store Connect rechaza videos sin audio).
+// H.264, o HEVC si mide más de 4096 de ancho (H.264 no llega a ese tamaño).
+// Si la salida termina en .png saca un solo fotograma fijo (el control, a los 9 s, antes del primer toque).
 // Sin dependencias: CoreGraphics + CoreText + AVFoundation.
 //
 //   DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift tools/make-preview.swift \
-//       [frames] [salida.mp4] [ícono.png]
+//       [frames] [salida.mp4|.png] [ANCHOxALTO]
 import AVFoundation
 import CoreGraphics
 import CoreText
@@ -15,10 +18,12 @@ import ImageIO
 let args = CommandLine.arguments
 let framesDir = URL(fileURLWithPath: args.count > 1 ? args[1] : "appstore/preview/frames")
 let outURL = URL(fileURLWithPath: args.count > 2 ? args[2] : "appstore/preview/preview.mp4")
-let iconURL = URL(fileURLWithPath: args.count > 3 ? args[3]
-    : "HisenseRemote/HisenseRemote/Assets.xcassets/AppIcon.appiconset/AppIcon.png")
+let iconURL = URL(fileURLWithPath: "HisenseRemote/HisenseRemote/Assets.xcassets/AppIcon.appiconset/AppIcon.png")
+let size = (args.count > 3 ? args[3] : "886x1920").split(separator: "x").compactMap { Int($0) }
+guard size.count == 2 else { fatalError("el tamaño va como ANCHOxALTO, por ejemplo 3840x1646") }
 
-let width = 886, height = 1920, fps: Int32 = 30
+let width = size[0], height = size[1], fps: Int32 = 30
+let landscape = width > height
 let duration = 22.0
 let space = CGColorSpace(name: CGColorSpace.sRGB)!
 
@@ -58,7 +63,10 @@ let captions = [
     Caption(start: 8.5, end: 13, text: "Navega los menús\ncon el D-pad"),
     Caption(start: 13, end: 16, text: "Volumen en vivo,\nel real de tu tele"),
     Caption(start: 16, end: 19.4, text: "Abre tus apps\ncon un toque"),
-]
+] + (landscape ? [   // el horizontal no tiene pantallas de entrada y salida: el ícono está siempre
+    Caption(start: 0, end: 2.6, text: "Tu tele Hisense,\ndesde el iPhone"),
+    Caption(start: 19.4, end: 22, text: "Gratis y\nsin anuncios"),
+] : [])
 let taps = [
     Tap(time: 9.6, at: up), Tap(time: 10.5, at: right), Tap(time: 11.4, at: right), Tap(time: 12.3, at: ok),
     Tap(time: 13.75, at: volPlus), Tap(time: 14.75, at: volPlus),
@@ -70,8 +78,9 @@ let phoneIn = 2.2, phoneOut = 19.4
 func clamp(_ x: Double) -> Double { min(max(x, 0), 1) }
 func ease(_ x: Double) -> CGFloat { let t = clamp(x); return CGFloat(t * t * (3 - 2 * t)) }
 
-// Texto centrado; `\n` separa renglones. `top` es la línea base del primer renglón.
-func text(_ ctx: CGContext, _ s: String, size: CGFloat, bold: Bool, top: CGFloat, alpha: CGFloat) {
+// Texto centrado en `cx` (por defecto, el centro); `\n` separa renglones. `top` es la línea base del primer renglón.
+func text(_ ctx: CGContext, _ s: String, size: CGFloat, bold: Bool, top: CGFloat, alpha: CGFloat,
+          cx: CGFloat = CGFloat(width) / 2) {
     let base = CTFontCreateUIFontForLanguage(bold ? .emphasizedSystem : .system, size, nil)!
     let attrs = [kCTFontAttributeName: base, kCTForegroundColorAttributeName: rgb(1, 1, 1)] as CFDictionary
     ctx.saveGState()
@@ -80,7 +89,7 @@ func text(_ ctx: CGContext, _ s: String, size: CGFloat, bold: Bool, top: CGFloat
     for (i, lineText) in s.split(separator: "\n").enumerated() {
         let line = CTLineCreateWithAttributedString(CFAttributedStringCreate(nil, String(lineText) as CFString, attrs))
         let w = CTLineGetTypographicBounds(line, nil, nil, nil)
-        ctx.textPosition = CGPoint(x: (CGFloat(width) - CGFloat(w)) / 2, y: top - CGFloat(i) * size * 1.2)
+        ctx.textPosition = CGPoint(x: cx - CGFloat(w) / 2, y: top - CGFloat(i) * size * 1.2)
         CTLineDraw(line, ctx)
     }
     ctx.restoreGState()
@@ -111,12 +120,16 @@ func icon(_ ctx: CGContext, _ img: CGImage, center: CGPoint, size: CGFloat, alph
     ctx.restoreGState()
 }
 
-// Teléfono: pantalla de 620 px de ancho con bisel negro, debajo del encabezado.
-let screenW: CGFloat = 620
+// Teléfono con bisel negro. Vertical: 620 px de ancho, debajo del encabezado.
+// Horizontal: ocupa el 86 % del alto, a la derecha. `k` escala bisel, sombras y toques.
+let screenH: CGFloat = landscape ? CGFloat(height) * 0.86 : 2868 * 620 / 1320
+let screenW = screenH * 1320 / 2868
 let screenScale = screenW / 1320
-let screenH = 2868 * screenScale
-let bezel: CGFloat = 16
-let screenRest = CGRect(x: (CGFloat(width) - screenW) / 2, y: 141 + bezel, width: screenW, height: screenH)
+let k = screenW / 620
+let bezel = 16 * k
+let screenRest = landscape
+    ? CGRect(x: CGFloat(width) * 0.70 - screenW / 2, y: (CGFloat(height) - screenH) / 2, width: screenW, height: screenH)
+    : CGRect(x: (CGFloat(width) - screenW) / 2, y: 141 + bezel, width: screenW, height: screenH)
 
 func shot(at t: Double) -> (current: CGImage, previous: CGImage?, mix: CGFloat) {
     let i = shots.lastIndex { $0.start <= t } ?? 0
@@ -132,13 +145,13 @@ func phone(_ ctx: CGContext, _ t: Double, offsetY: CGFloat, alpha: CGFloat) {
     ctx.setAlpha(alpha)
     ctx.beginTransparencyLayer(auxiliaryInfo: nil)
     ctx.saveGState()
-    ctx.setShadow(offset: CGSize(width: 0, height: -24), blur: 60, color: rgb(0, 0, 0, 0.45))
+    ctx.setShadow(offset: CGSize(width: 0, height: -24 * k), blur: 60 * k, color: rgb(0, 0, 0, 0.45))
     ctx.addPath(CGPath(roundedRect: body, cornerWidth: radius + bezel, cornerHeight: radius + bezel, transform: nil))
     ctx.setFillColor(rgb(0.06, 0.06, 0.07)); ctx.fillPath()
     ctx.restoreGState()
-    ctx.addPath(CGPath(roundedRect: body.insetBy(dx: 1.5, dy: 1.5), cornerWidth: radius + bezel - 1.5,
-                       cornerHeight: radius + bezel - 1.5, transform: nil))
-    ctx.setStrokeColor(rgb(1, 1, 1, 0.18)); ctx.setLineWidth(3); ctx.strokePath()
+    ctx.addPath(CGPath(roundedRect: body.insetBy(dx: 1.5 * k, dy: 1.5 * k), cornerWidth: radius + bezel - 1.5 * k,
+                       cornerHeight: radius + bezel - 1.5 * k, transform: nil))
+    ctx.setStrokeColor(rgb(1, 1, 1, 0.18)); ctx.setLineWidth(3 * k); ctx.strokePath()
 
     ctx.saveGState()
     ctx.addPath(CGPath(roundedRect: screen, cornerWidth: radius, cornerHeight: radius, transform: nil))
@@ -155,11 +168,11 @@ func phone(_ ctx: CGContext, _ t: Double, offsetY: CGFloat, alpha: CGFloat) {
         if dt < 0.15 {
             let a = dt < 0 ? ease((dt + 0.25) / 0.25) : 1 - ease(dt / 0.15)
             ctx.setFillColor(rgb(1, 1, 1, 0.45 * a))
-            ctx.fillEllipse(in: CGRect(x: p.x - 26, y: p.y - 26, width: 52, height: 52))
+            ctx.fillEllipse(in: CGRect(x: p.x - 26 * k, y: p.y - 26 * k, width: 52 * k, height: 52 * k))
         }
         if dt >= 0 {
-            let k = ease(dt / 0.6), r = 22 + 46 * k
-            ctx.setStrokeColor(rgb(1, 1, 1, 0.8 * (1 - k))); ctx.setLineWidth(4)
+            let e = ease(dt / 0.6), r = (22 + 46 * e) * k
+            ctx.setStrokeColor(rgb(1, 1, 1, 0.8 * (1 - e))); ctx.setLineWidth(4 * k)
             ctx.strokeEllipse(in: CGRect(x: p.x - r, y: p.y - r, width: 2 * r, height: 2 * r))
         }
     }
@@ -170,7 +183,23 @@ func phone(_ ctx: CGContext, _ t: Double, offsetY: CGFloat, alpha: CGFloat) {
 
 let iconImage = load(iconURL)
 
+// Encabezado horizontal: ícono y nombre fijos a la izquierda, la frase cambia debajo,
+// y el teléfono siempre a la derecha (así se puede repetir en bucle).
+func renderLandscape(_ ctx: CGContext, _ t: Double) {
+    background(ctx, t)
+    let H = CGFloat(height), cx = CGFloat(width) * 0.33
+    icon(ctx, iconImage, center: CGPoint(x: cx, y: H * 0.72), size: H * 0.2, alpha: 1)
+    text(ctx, "HisenseRemote", size: H * 0.065, bold: true, top: H * 0.53, alpha: 1, cx: cx)
+    for c in captions where t >= c.start && t < c.end {
+        let a = ease((t - c.start) / 0.35) * (1 - ease((t - c.end + 0.3) / 0.3))
+        let rise = H * 0.02 * (1 - ease((t - c.start) / 0.45))
+        text(ctx, c.text, size: H * 0.075, bold: false, top: H * 0.38 - rise, alpha: a, cx: cx)
+    }
+    phone(ctx, t, offsetY: 0, alpha: 1)
+}
+
 func render(_ ctx: CGContext, _ t: Double) {
+    if landscape { renderLandscape(ctx, t); return }
     background(ctx, t)
     let H = CGFloat(height), mid = CGFloat(width) / 2
 
@@ -203,17 +232,39 @@ func render(_ ctx: CGContext, _ t: Double) {
     }
 }
 
-// MARK: - Video
+func context(_ data: UnsafeMutableRawPointer?, bytesPerRow: Int) -> CGContext {
+    let ctx = CGContext(data: data, width: width, height: height, bitsPerComponent: 8, bytesPerRow: bytesPerRow,
+                        space: space,
+                        bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue)!
+    ctx.interpolationQuality = .high
+    return ctx
+}
+
 try? FileManager.default.removeItem(at: outURL)
 try FileManager.default.createDirectory(at: outURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+
+// MARK: - Imagen fija
+if outURL.pathExtension.lowercased() == "png" {
+    let ctx = context(nil, bytesPerRow: 0)
+    render(ctx, 9.0)
+    let dest = CGImageDestinationCreateWithURL(outURL as CFURL, "public.png" as CFString, 1, nil)!
+    CGImageDestinationAddImage(dest, ctx.makeImage()!, nil)
+    guard CGImageDestinationFinalize(dest) else { fatalError("no se pudo escribir \(outURL.path)") }
+    print("✓ \(outURL.path)")
+    exit(0)
+}
+
+// MARK: - Video
 let writer = try AVAssetWriter(outputURL: outURL, fileType: .mp4)
 
 let video = AVAssetWriterInput(mediaType: .video, outputSettings: [
-    AVVideoCodecKey: AVVideoCodecType.h264, AVVideoWidthKey: width, AVVideoHeightKey: height,
+    AVVideoCodecKey: width > 4096 ? AVVideoCodecType.hevc : AVVideoCodecType.h264,
+    AVVideoWidthKey: width, AVVideoHeightKey: height,
     AVVideoCompressionPropertiesKey: [
-        AVVideoAverageBitRateKey: 10_000_000, AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
+        // 10 Mbps para el App Preview (lo que pide Apple); más para los tamaños grandes.
+        AVVideoAverageBitRateKey: min(40_000_000, 10_000_000 * width * height / (886 * 1920)),
         AVVideoExpectedSourceFrameRateKey: fps, AVVideoMaxKeyFrameIntervalKey: fps,
-    ],
+    ].merging(width > 4096 ? [:] : [AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel]) { a, _ in a },
 ])
 let adaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: video, sourcePixelBufferAttributes: [
     kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
@@ -221,7 +272,7 @@ let adaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: video, sour
 ])
 let audio = AVAssetWriterInput(mediaType: .audio, outputSettings: [
     AVFormatIDKey: kAudioFormatMPEG4AAC, AVSampleRateKey: 44_100, AVNumberOfChannelsKey: 2,
-    AVEncoderBitRateKey: 128_000,
+    AVEncoderBitRateKey: 256_000,
 ])
 writer.add(video); writer.add(audio)
 guard writer.startWriting() else { fatalError("AVAssetWriter: \(writer.error?.localizedDescription ?? "?")") }
@@ -263,11 +314,7 @@ func videoFrame(_ n: Int) -> CVPixelBuffer {
     CVPixelBufferPoolCreatePixelBuffer(nil, adaptor.pixelBufferPool!, &pb)
     let buffer = pb!
     CVPixelBufferLockBaseAddress(buffer, [])
-    let ctx = CGContext(data: CVPixelBufferGetBaseAddress(buffer), width: width, height: height, bitsPerComponent: 8,
-                        bytesPerRow: CVPixelBufferGetBytesPerRow(buffer), space: space,
-                        bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue)!
-    ctx.interpolationQuality = .high
-    render(ctx, t)
+    render(context(CVPixelBufferGetBaseAddress(buffer), bytesPerRow: CVPixelBufferGetBytesPerRow(buffer)), t)
     CVPixelBufferUnlockBaseAddress(buffer, [])
     return buffer
 }

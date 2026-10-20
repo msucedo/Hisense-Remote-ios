@@ -1,14 +1,16 @@
 #!/bin/zsh
 # Saca las capturas reales de la app (modo demo, ver HisenseRemote/HisenseRemote/Demo.swift)
-# en el simulador del iPhone 16 Pro Max (1320×2868). Las usa tools/make-preview.swift.
+# en el simulador. Por defecto el iPhone 16 Pro Max (1320×2868, pantalla de 6.9"), que es lo que
+# usa tools/make-preview.swift. Con SIM se elige otro, p. ej. las capturas de 6.3" (1206×2622):
 #
 #   tools/capture-preview.sh [carpeta]      (por defecto appstore/preview/frames)
+#   SIM="iPhone 16 Pro" tools/capture-preview.sh appstore/screenshots/6.3
 set -euo pipefail
 
 export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 ROOT=${0:A:h:h}
 OUT=${1:-$ROOT/appstore/preview/frames}
-SIM="iPhone 16 Pro Max"
+SIM=${SIM:-"iPhone 16 Pro Max"}
 BUNDLE=com.mariosaucedo.HisenseRemote
 BUILD=$ROOT/.build/preview-sim
 
