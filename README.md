@@ -1,14 +1,9 @@
 # HisenseRemote
 
-Un control remoto nativo para iPhone que maneja televisores **Hisense VIDAA**
-directamente por el WiFi, sin servidores ni computadora de por medio. Abres la
-app, encuentra tu tele en la red, la emparejas con un PIN una sola vez y listo:
-D-pad, volumen en vivo, encender/apagar, cambiar de fuente y abrir apps como
-YouTube o Netflix.
+Control remoto iPhone app para televisores **Hisense VIDAA**a travez de WiFi.
+Abres la app, encuentra tu tele en la red, la emparejas con un PIN una sola vez y listo:
+D-pad, volumen en vivo, encender/apagar, cambiar de fuente y botones directos a aplicaciónes.
 
-Es la versión nativa de [hisense-remote](../hisense-remote), el control web en
-Node que necesitaba una Mac encendida como puente. Un navegador no puede abrir
-conexiones TLS crudas ni presentar un certificado de cliente; una app nativa sí.
 
 ## Cómo funciona
 
@@ -52,9 +47,6 @@ en otra carpeta, Xcode no lo mete en la app). `*.p12` está en `.gitignore`.
 4. Acepta el permiso de **Red local**. Con la app oficial RemoteNOW cerrada,
    escribe el PIN que muestra la tele.
 
-La guía detallada (incluido cómo crear el proyecto desde cero) está en
-[`ios/SETUP.md`](ios/SETUP.md).
-
 ### Probar desde la terminal
 
 ```bash
@@ -72,8 +64,7 @@ Samsung y Sony como drivers aparte. El plan está en [`ROADMAP.md`](ROADMAP.md).
 
 ## Nota
 
-Esto es para interoperar con **tu propia tele en tu propia red**, como uso
-personal. El certificado es propiedad de Hisense; ni el certificado ni la app
+El certificado es propiedad de Hisense; ni el certificado ni la app
 oficial se incluyen aquí. Los tokens de emparejamiento quedan en el teléfono
 (o en `cli.token.json`, ignorado por git).
 
