@@ -4,12 +4,17 @@ Control remoto nativo de iPhone (Swift) para smart TVs. **Primera entrega: solo 
 La idea a futuro es un control universal (también Samsung y Sony), agregando cada marca como
 "parche" sin rediseñar la app.
 
-Última actualización: 2026-10-19.
+Última actualización: 2026-10-20.
 
 ## Estado actual
 
 **✅ Hisense funciona de punta a punta en el iPhone** (escaneo, PIN, D-pad, volumen en vivo,
 fuentes, apps, encender). Repo con `README.md` y `LICENSE` (MIT).
+
+**🚀 En camino a la App Store (2026-10-20).** Listo en el repo: ícono (`tools/make-icon.swift`),
+`PrivacyInfo.xcprivacy`, `ITSAppUsesNonExemptEncryption = NO` (en `HisenseRemote/Info.plist`),
+solo iPhone, `PRIVACY.md` y textos de la ficha en `appstore/LISTING.md`. Falta lo que necesita la
+cuenta de pago (Developer Program, Archive, App Store Connect, capturas y video): ver `appstore/PUBLICAR.md`.
 
 Lo que ya está resuelto del protocolo (detalles en el código y en `../hisense-remote/`, la versión Node):
 - MQTT 3.1.1 sobre TLS en el puerto `36669`, con **mutual TLS**: certificado de cliente de la app
@@ -27,6 +32,8 @@ Lo que ya está resuelto del protocolo (detalles en el código y en `../hisense-
 | `HisenseKit/` | Núcleo, producto SwiftPM `RemoteKit`: `Crypto`, `MQTT` (framing a mano + transporte NIOSSL), `HisenseTV` (comandos y PIN), `Discovery` (escaneo del 36669). |
 | `HisenseRemote/` | Proyecto Xcode de la app. **El código de la app vive en `HisenseRemote/HisenseRemote/`** (fuente única), junto a `client.p12`. |
 | `cli/` | `hisensectl` (`scan`, `ping`, `pair`, `cmd`) para probar el núcleo desde la Mac. |
+| `appstore/` | Ficha de la tienda (`LISTING.md`) y guía para publicar (`PUBLICAR.md`). |
+| `tools/` | `make-icon.swift`: genera los PNG del ícono. |
 | `ios/SETUP.md` | Guía para crear/configurar el proyecto Xcode desde cero. |
 | `secrets/` | Copia local del `.p12` (ignorada por git). |
 
@@ -62,8 +69,8 @@ Hoy la app usa `HisenseTV` directamente, las teclas están en `Keys.map` (nombre
 - **Descubrimiento universal** por SSDP que identifique la marca.
 
 ## Notas
-- Uso personal: el driver Hisense usa el certificado de Hisense (zona gris). Un universal
-  **vendible** sería por infrarrojo (IR), no esto.
+- El driver Hisense usa el certificado de cliente de Hisense; para la App Store se cuenta con
+  permiso para usarlo (Apple puede pedir el comprobante en la revisión).
 - Fuera de git: `*.p12`, `secrets/`, `*.token.json`, `.build/`, `xcuserdata/`.
 - Al probar, conexiones de una en una (no en ráfaga) para no dejar la TV en estado raro.
 - El aviso de Xcode `nw_connection_copy_connected_remote_endpoint … unconnected` es ruido del escaneo.

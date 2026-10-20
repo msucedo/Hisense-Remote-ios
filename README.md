@@ -1,8 +1,8 @@
 # HisenseRemote
 
-Control remoto iPhone app para televisores **Hisense VIDAA**a travez de WiFi.
+App de iPhone que funciona como control remoto para televisores **Hisense VIDAA** a través del WiFi.
 Abres la app, encuentra tu tele en la red, la emparejas con un PIN una sola vez y listo:
-D-pad, volumen en vivo, encender/apagar, cambiar de fuente y botones directos a aplicaciónes.
+D-pad, volumen en vivo, encender/apagar, cambiar de fuente y botones directos a aplicaciones.
 
 
 ## Cómo funciona
@@ -23,6 +23,8 @@ intermitente, y NIOSSL (BoringSSL) lo acepta igual que OpenSSL.
 | `HisenseKit/` | El núcleo `RemoteKit` (paquete Swift): cripto, MQTT, comandos de la tele y descubrimiento en la red. |
 | `HisenseRemote/` | La app SwiftUI para iPhone (proyecto de Xcode). |
 | `cli/` | `hisensectl`, una herramienta de terminal para probar el núcleo desde la Mac. |
+| `appstore/` | Textos de la ficha (`LISTING.md`) y la guía para publicar (`PUBLICAR.md`). |
+| `tools/` | `make-icon.swift`, que genera el ícono (claro, oscuro y tintado). |
 
 ## Requisitos
 
@@ -56,6 +58,12 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift build
 .build/debug/hisensectl pair <ip>               # empareja con el PIN
 .build/debug/hisensectl cmd <ip> app YouTube    # abre YouTube
 ```
+
+## Publicar en la App Store
+
+Todo lo que se puede preparar desde el repo ya está listo: ícono, manifiesto de privacidad,
+cifrado declarado como exento y la [política de privacidad](PRIVACY.md). Los pasos con tu
+cuenta de Apple están en [`appstore/PUBLICAR.md`](appstore/PUBLICAR.md).
 
 ## Lo que viene
 
