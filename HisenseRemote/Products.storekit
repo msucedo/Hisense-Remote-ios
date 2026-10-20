@@ -1,0 +1,40 @@
+{
+  "identifier" : "6F1C2A4E-3B7D-4E8A-9C21-5D0B7A3F9E11",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "29.0",
+      "familyShareable" : true,
+      "internalID" : "6740000001",
+      "localizations" : [
+        {
+          "description" : "Abre tus apps con un toque y todo lo que venga después.",
+          "displayName" : "Versión completa",
+          "locale" : "es_MX"
+        }
+      ],
+      "productID" : "com.mariosaucedo.HisenseRemote.full",
+      "referenceName" : "Versión completa",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "",
+    "_developerTeamID" : "M6JLQVH4Y7",
+    "_failTransactionsEnabled" : false,
+    "_locale" : "es_MX",
+    "_storefront" : "MEX",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

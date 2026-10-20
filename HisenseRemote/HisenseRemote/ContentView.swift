@@ -2,19 +2,30 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var vm: RemoteViewModel
+    @EnvironmentObject var store: Store
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .topTrailing) {
             Color(red: 0.05, green: 0.06, blue: 0.08).ignoresSafeArea()
-            switch vm.screen {
-            case .scanning: scanning
-            case .pickTV:   pickTV
-            case .pairing:  pairing
-            case .remote:   RemoteView()
+            Group {
+                switch vm.screen {
+                case .scanning: scanning
+                case .pickTV:   pickTV
+                case .pairing:  pairing
+                case .remote:   RemoteView()
+                }
+            }.frame(maxWidth: .infinity, maxHeight: .infinity)
+            // Siempre a la mano (también sin tele, para el revisor de Apple).
+            if !store.isFull && vm.screen != .pairing {
+                Button("★ Versión completa") { store.showUpgrade = true }
+                    .font(.footnote.bold()).padding(.horizontal, 12).padding(.vertical, 6)
+                    .background(Color.accentColor.opacity(0.25)).clipShape(Capsule())
+                    .padding(.trailing)
             }
         }
         .foregroundStyle(.white)
         .preferredColorScheme(.dark)
+        .sheet(isPresented: $store.showUpgrade) { UpgradeView().environmentObject(store) }
     }
 
     private var scanning: some View {
@@ -56,6 +67,7 @@ struct ContentView: View {
 // Pantalla del control remoto.
 struct RemoteView: View {
     @EnvironmentObject var vm: RemoteViewModel
+    @EnvironmentObject var store: Store
 
     var body: some View {
         ScrollView {
@@ -64,7 +76,7 @@ struct RemoteView: View {
                     Circle().fill(.green).frame(width: 8, height: 8)
                     Text(vm.status).font(.footnote).foregroundStyle(.secondary)
                     Spacer()
-                }
+                }.padding(.trailing, store.isFull ? 0 : 150)   // deja libre el botón ★
 
                 big("⏻  Encender / Apagar", color: .accentColor) { vm.key("power") }
 
@@ -89,8 +101,16 @@ struct RemoteView: View {
                 section("Fuentes") {
                     chips(vm.sources.map(\.name)) { i in vm.setSource(vm.sources[i]) }
                 }
-                section("Apps") {
-                    chips(vm.apps.map(\.name)) { i in vm.launch(vm.apps[i]) }
+                // Apps es de la versión completa: sin ella se ven bloqueadas y
+                // al tocarlas se abre la hoja de compra.
+                section(store.isFull ? "Apps" : "Apps 🔒") {
+                    if store.isFull {
+                        chips(vm.apps.map(\.name)) { i in vm.launch(vm.apps[i]) }
+                    } else if vm.apps.isEmpty {
+                        pill("🔒 Desbloquear Apps") { store.showUpgrade = true }
+                    } else {
+                        chips(vm.apps.map(\.name)) { _ in store.showUpgrade = true }.opacity(0.45)
+                    }
                 }
             }
             .padding()
@@ -137,5 +157,71 @@ struct RemoteView: View {
                     .background(Color.white.opacity(0.1)).clipShape(RoundedRectangle(cornerRadius: 10))
             }
         }
+    }
+}
+
+// Hoja de compra de la versión completa. Las funciones nuevas de pago se agregan a `features`.
+struct UpgradeView: View {
+    @EnvironmentObject var store: Store
+    @Environment(\.dismiss) private var dismiss
+
+    private let features = [
+        ("square.grid.2x2.fill", "Abre tus apps con un toque", "YouTube, Netflix y todas las de tu tele, sin buscarlas con el D-pad."),
+        ("sparkles", "Lo que venga después", "Las próximas funciones de la versión completa, incluidas."),
+    ]
+
+    var body: some View {
+        ZStack {
+            Color(red: 0.05, green: 0.06, blue: 0.08).ignoresSafeArea()
+            VStack(spacing: 22) {
+                Text("Versión completa").font(.largeTitle.bold()).padding(.top, 32)
+                Text("Una sola compra, para siempre. Sin anuncios.")
+                    .foregroundStyle(.secondary).multilineTextAlignment(.center)
+
+                VStack(alignment: .leading, spacing: 16) {
+                    ForEach(features, id: \.1) { icon, title, detail in
+                        HStack(alignment: .top, spacing: 14) {
+                            Image(systemName: icon).font(.title2).foregroundStyle(Color.accentColor).frame(width: 32)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(title).font(.headline)
+                                Text(detail).font(.subheadline).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
+                .padding().frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.white.opacity(0.06)).clipShape(RoundedRectangle(cornerRadius: 16))
+
+                Spacer()
+
+                if store.isFull {
+                    Label("¡Ya tienes la versión completa!", systemImage: "checkmark.seal.fill")
+                        .font(.headline).foregroundStyle(.green)
+                    Button("Listo") { dismiss() }
+                        .font(.headline).frame(maxWidth: .infinity, minHeight: 52)
+                        .background(Color.accentColor).clipShape(RoundedRectangle(cornerRadius: 16))
+                } else {
+                    if let m = store.message {
+                        Text(m).font(.footnote).foregroundStyle(.orange).multilineTextAlignment(.center)
+                    }
+                    Button { Task { await store.buy() } } label: {
+                        Group {
+                            if store.busy || store.loading { ProgressView().tint(.white) }
+                            else { Text(store.product.map { "Comprar por \($0.displayPrice)" } ?? "Reintentar") }
+                        }
+                        .font(.headline).frame(maxWidth: .infinity, minHeight: 52)
+                    }
+                    .background(Color.accentColor).clipShape(RoundedRectangle(cornerRadius: 16))
+                    .disabled(store.busy || store.loading)   // sin producto, el botón reintenta cargarlo
+
+                    Button("Restaurar compras") { Task { await store.restore() } }
+                        .font(.subheadline).disabled(store.busy)
+                }
+            }
+            .padding(24)
+        }
+        .foregroundStyle(.white)
+        .preferredColorScheme(.dark)
+        .task { if store.product == nil { await store.loadProduct() } }
     }
 }

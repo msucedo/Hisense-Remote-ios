@@ -14,7 +14,7 @@ Idioma principal: **Español (México)**.
 | Bundle ID | `com.mariosaucedo.HisenseRemote` |
 | SKU | `hisenseremote-ios-1` (cualquier texto único; solo lo ves tú) |
 | Clasificación por edad | 4+ (responde "No" a todo el cuestionario) |
-| Precio | Gratis |
+| Precio | Gratis (con compra in-app de $29 MXN) |
 | URL de privacidad | `https://github.com/msucedo/Hisense-Remote-ios/blob/main/PRIVACY.md` |
 | URL de soporte | `https://github.com/msucedo/Hisense-Remote-ios` |
 
@@ -24,7 +24,7 @@ Idioma principal: **Español (México)**.
 ## Texto promocional (170)
 
 ```
-Controla tu tele Hisense VIDAA desde el iPhone por WiFi: D-pad, volumen en vivo, fuentes y tus apps a un toque.
+Controla tu tele Hisense VIDAA desde el iPhone por WiFi. Gratis y sin anuncios; la versión completa abre tus apps con un toque.
 ```
 
 ## Descripción (4000)
@@ -40,7 +40,11 @@ Abre la app, encuentra tu tele automáticamente, emparéjala una sola vez con el
 • Volumen en vivo: ves el nivel real de la tele mientras lo cambias
 • Silenciar
 • Cambiar de fuente (HDMI, TV, etc.) con un toque
-• Abrir tus apps directamente: YouTube, Netflix y las demás que tenga tu tele
+Gratis y sin anuncios.
+
+VERSIÓN COMPLETA ($29 MXN, una sola compra)
+• Abre tus apps directamente: YouTube, Netflix y las demás que tenga tu tele
+• Incluye las funciones que se agreguen en el futuro
 
 Privacidad: la app solo habla con tu tele dentro de tu red local. No recolecta datos, no tiene anuncios y no envía nada a internet.
 
@@ -52,6 +56,25 @@ Requisitos: un televisor Hisense con sistema VIDAA conectado al mismo WiFi que t
 ```
 hisense,vidaa,control,remoto,tv,tele,televisor,wifi,smart tv,mando,volumen
 ```
+
+## Compra dentro de la app
+
+App Store Connect ▸ tu app ▸ **Monetización ▸ Compras dentro de la app ▸ +**
+
+| Campo | Valor |
+|---|---|
+| Tipo | **No consumible** |
+| Nombre de referencia | `Versión completa` |
+| Product ID | `com.mariosaucedo.HisenseRemote.full` (debe ser exacto: es el que busca el código) |
+| Precio | $29.00 MXN (elige México como país base; Apple calcula los demás) |
+| Compartir en familia | Recomendado **activado**. ⚠️ Una vez activado ya no se puede desactivar. |
+| Nombre visible (es-MX) | `Versión completa` |
+| Descripción (es-MX, 55) | `Abre tus apps con un toque y lo que venga después.` |
+| Captura para revisión | Captura de la hoja "Versión completa" (botón ★ arriba a la derecha) |
+| Notas de revisión | `Unlocks the "Apps" section (launch TV apps with one tap). Tap "★ Versión completa" at the top right of any screen — it is reachable without a TV.` |
+
+La compra debe agregarse a la versión 1.0 (sección "Compras dentro de la app" de la versión)
+antes de mandarla a revisión: la primera compra in-app solo se revisa junto con una versión de la app.
 
 ## App Privacy (cuestionario de privacidad)
 
@@ -72,6 +95,8 @@ Testing requires a Hisense VIDAA TV on the same Wi-Fi network, so we attached a 
 
 No login is required. The Local Network permission is used only to discover and control the TV.
 
+In-app purchase: the app is free; the non-consumable "Versión completa" unlocks the "Apps" section. The purchase screen is reachable without a TV from the "★ Versión completa" button at the top right of the first screen, and includes "Restaurar compras" (Restore Purchases).
+
 The developer is authorized by Hisense to use the Hisense name and the client certificate used to connect to the TV. Documentation can be provided on request.
 ```
 
@@ -84,6 +109,24 @@ The developer is authorized by Hisense to use the Hisense name and the client ce
   Si tu iPhone es de otro tamaño, App Store Connect acepta capturas de 6.9" y las escala a los demás.
 - Sugeridas (3 a 5): buscando la tele / pantalla del PIN / control con el D-pad / sección de Apps.
 - No pongas el PIN real de tu tele visible si no quieres.
+
+## App Preview (el video de arriba de la ficha)
+
+Ya está hecho: `appstore/preview/preview.mp4` (886×1920, 30 fps, 22 s, H.264 + audio en silencio,
+que App Store Connect exige aunque no suene). Usa capturas reales de la app, como pide Apple.
+
+- **Dónde se sube:** versión 1.0 ▸ *Vista previa y capturas de pantalla* ▸ iPhone 6.9" ▸ arrastra el MP4
+  al primer lugar (antes de las capturas). Hasta 3 videos por idioma.
+- **Póster:** App Store Connect te deja elegir el fotograma que se ve antes de que arranque;
+  el de ~10 s (el control con "Navega los menús con el D-pad") es buena opción.
+- **Regenerarlo** (si cambia la interfaz):
+  ```
+  tools/capture-preview.sh     # compila, abre el simulador en modo demo y saca las capturas
+  DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift tools/make-preview.swift
+  ```
+  Las frases, tiempos y toques están al inicio de `tools/make-preview.swift` (sección "Guion").
+  El modo demo vive en `HisenseRemote/HisenseRemote/Demo.swift` y solo existe en builds DEBUG.
+- Las capturas de `appstore/preview/frames/` (1320×2868) sirven también como screenshots de 6.9".
 
 ## Video para el revisor
 

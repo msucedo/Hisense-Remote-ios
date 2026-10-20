@@ -4,7 +4,7 @@ Control remoto nativo de iPhone (Swift) para smart TVs. **Primera entrega: solo 
 La idea a futuro es un control universal (también Samsung y Sony), agregando cada marca como
 "parche" sin rediseñar la app.
 
-Última actualización: 2026-10-20.
+Última actualización: 2026-10-20 (compra in-app).
 
 ## Estado actual
 
@@ -15,6 +15,10 @@ fuentes, apps, encender). Repo con `README.md` y `LICENSE` (MIT).
 `PrivacyInfo.xcprivacy`, `ITSAppUsesNonExemptEncryption = NO` (en `HisenseRemote/Info.plist`),
 solo iPhone, `PRIVACY.md` y textos de la ficha en `appstore/LISTING.md`. Falta lo que necesita la
 cuenta de pago (Developer Program, Archive, App Store Connect, capturas y video): ver `appstore/PUBLICAR.md`.
+
+**💰 Versión completa (2026-10-20).** Cuenta de Apple Developer aprobada. Compra in-app no consumible
+`com.mariosaucedo.HisenseRemote.full` ($29 MXN) hecha con StoreKit 2 y probada con `Products.storekit`.
+Falta en App Store Connect: Paid Apps Agreement, crear la compra y mandarla junto con la 1.0.
 
 Lo que ya está resuelto del protocolo (detalles en el código y en `../hisense-remote/`, la versión Node):
 - MQTT 3.1.1 sobre TLS en el puerto `36669`, con **mutual TLS**: certificado de cliente de la app
@@ -30,7 +34,7 @@ Lo que ya está resuelto del protocolo (detalles en el código y en `../hisense-
 | Carpeta | Qué es |
 |---|---|
 | `HisenseKit/` | Núcleo, producto SwiftPM `RemoteKit`: `Crypto`, `MQTT` (framing a mano + transporte NIOSSL), `HisenseTV` (comandos y PIN), `Discovery` (escaneo del 36669). |
-| `HisenseRemote/` | Proyecto Xcode de la app. **El código de la app vive en `HisenseRemote/HisenseRemote/`** (fuente única), junto a `client.p12`. |
+| `HisenseRemote/` | Proyecto Xcode de la app. **El código de la app vive en `HisenseRemote/HisenseRemote/`** (fuente única), junto a `client.p12`. `Store.swift` = compra in-app; `Products.storekit` (junto al .xcodeproj) = tienda simulada para pruebas. |
 | `cli/` | `hisensectl` (`scan`, `ping`, `pair`, `cmd`) para probar el núcleo desde la Mac. |
 | `appstore/` | Ficha de la tienda (`LISTING.md`) y guía para publicar (`PUBLICAR.md`). |
 | `tools/` | `make-icon.swift`: genera los PNG del ícono. |
@@ -47,6 +51,17 @@ Lo que ya está resuelto del protocolo (detalles en el código y en `../hisense-
   Con Apple ID gratis caduca a los ~7 días: se renueva dándole Run otra vez.
 - **Verificar que la app compila sin el iPhone:**
   `xcodebuild -project HisenseRemote/HisenseRemote.xcodeproj -scheme HisenseRemote -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build`
+
+## Versión completa (compra in-app)
+
+- App gratis y sin anuncios. La compra única "Versión completa" ($29 MXN) desbloquea funciones extra.
+- **Hoy incluye:** la sección **Apps**.
+- **Regla para lo nuevo:** toda función de pago se condiciona con `store.isFull` (el `Store` está en el
+  entorno de SwiftUI) y se agrega a la lista `features` de `UpgradeView` en `ContentView.swift`, para
+  que aparezca en la hoja de compra. Nunca le quites a la versión gratis algo que ya tenía.
+- **Ideas para la versión completa:** teclado para buscar en la tele, varias teles guardadas, widget /
+  Centro de control, atajos de Siri, Apple Watch, botones favoritos de apps.
+- Al sacar funciones nuevas: subir `MARKETING_VERSION` (1.1, 1.2…) y el build.
 
 ## Siguiente: preparar el patrón de drivers (aún NO hecho)
 

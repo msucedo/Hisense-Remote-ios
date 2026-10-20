@@ -4,6 +4,9 @@ App de iPhone que funciona como control remoto para televisores **Hisense VIDAA*
 Abres la app, encuentra tu tele en la red, la emparejas con un PIN una sola vez y listo:
 D-pad, volumen en vivo, encender/apagar, cambiar de fuente y botones directos a aplicaciones.
 
+La app es **gratis y sin anuncios**. La **versión completa** ($29 MXN, una sola compra)
+desbloquea la sección **Apps** y las funciones que se agreguen después.
+
 
 ## Cómo funciona
 
@@ -17,6 +20,9 @@ la app oficial RemoteNOW). El firmware moderno pide tres cosas:
 El cliente MQTT está escrito a mano. Para el TLS se usa **SwiftNIO + NIOSSL**:
 el TLS de Apple (Network.framework) rechaza el handshake de estas teles de forma
 intermitente, y NIOSSL (BoringSSL) lo acepta igual que OpenSSL.
+
+La compra de la versión completa usa **StoreKit 2** (`Store.swift`), sin servidor:
+Apple firma las transacciones y la app las verifica en el teléfono.
 
 | Parte | Qué hace |
 |---|---|
@@ -48,6 +54,13 @@ en otra carpeta, Xcode no lo mete en la app). `*.p12` está en `.gitignore`.
 3. Conecta el iPhone, selecciónalo como destino y dale **Run**.
 4. Acepta el permiso de **Red local**. Con la app oficial RemoteNOW cerrada,
    escribe el PIN que muestra la tele.
+
+### Probar la compra sin cobrar
+
+En Xcode: **Product ▸ Scheme ▸ Edit Scheme ▸ Run ▸ Options ▸ StoreKit Configuration**
+= `Products.storekit`. Así la compra se simula en el iPhone o el simulador (**Debug ▸ StoreKit ▸
+Manage Transactions** para borrarla o reembolsarla). El test `HisenseRemoteTests/StoreTests.swift`
+prueba comprar, desbloquear y reembolsar.
 
 ### Probar desde la terminal
 
