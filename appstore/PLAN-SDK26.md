@@ -1,5 +1,13 @@
 # HisenseRemote: recompilar con el SDK de iOS 26+ para poder subirla
 
+> ✅ **Hecho (2026-10-20).** macOS 15.8.1 + Xcode 26.3 (quedó en `/Applications/Copia de Xcode.app`).
+> Compila sin errores con Swift 6.2.4 y el SDK `iphoneos26.2`. Se corrigió un aviso de `Sendable` en
+> `HisenseKit/MQTT.swift` (`pipeline.syncOperations`). No hizo falta subir NIO. `StoreTests` pasa en el
+> simulador iOS 26.3 (hizo falta `HisenseRemote/Debug.entitlements` con `get-task-allow`: sin él, storekitd
+> rechaza `SKTestSession` con "is not installed for development"). Build **2**, versión 1.0, mínimo iOS 18.2.
+> Las pantallas en iOS 26 se ven bien. En el simulador 26.3 los emojis salen como "?" y en el 18.3 no: es del
+> simulador, pero hay que confirmarlo en el iPhone. Falta lo tuyo: Archive ▸ Upload.
+
 ## Contexto
 App Store Connect rechazó el build: se compiló con **Xcode 16.2 (SDK iOS 18.2)** y Apple ya exige el **SDK de iOS 26 o posterior** (Xcode 26+).
 

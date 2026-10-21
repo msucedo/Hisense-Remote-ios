@@ -5,3 +5,4 @@ hisensectl
 DerivedData/
 *.p12
 xcuserdata/
+.DS_Store

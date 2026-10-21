@@ -14,6 +14,8 @@ struct StoreTests {
         .appendingPathComponent("Products.storekit")
 
     @Test func compraDesbloqueaYReembolsoBloquea() async throws {
+        // En iOS 26 la app necesita get-task-allow (HisenseRemote/Debug.entitlements); sin él,
+        // SKTestSession falla (SKInternalErrorDomain 3), la compra se va a la tienda real y se cuelga.
         let session = try SKTestSession(contentsOf: config)
         session.resetToDefaultState()
         session.clearTransactions()
@@ -22,7 +24,8 @@ struct StoreTests {
         let store = Store()
         await store.loadProduct()
         #expect(store.product?.id == Store.fullID)
-        #expect(store.product?.displayPrice.contains("29") == true)
+        #expect(store.product?.displayPrice.contains("29") == true,
+                "precio: \(store.product?.displayPrice ?? "nil")")
 
         await store.refreshEntitlement()
         #expect(store.isFull == false)

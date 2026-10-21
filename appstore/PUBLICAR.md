@@ -36,6 +36,9 @@ Lo que sigue lo haces tú, porque necesita tu cuenta de Apple.
 
 ## 3. Subir el build desde Xcode
 
+> **Usa Xcode 26 o más nuevo** (SDK de iOS 26+). App Store Connect rechaza los builds hechos con
+> Xcode 16 / SDK 18 (así pasó con el build 1). En esta Mac es `/Applications/Copia de Xcode.app` (Xcode 26.3).
+
 1. Abre `HisenseRemote/HisenseRemote.xcodeproj`.
 2. Target HisenseRemote ▸ **Signing & Capabilities** ▸ Team = tu cuenta de pago,
    con "Automatically manage signing" activado. Agrega **+ Capability ▸ In-App Purchase**

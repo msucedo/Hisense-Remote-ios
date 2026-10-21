@@ -160,7 +160,9 @@ final class MQTTClient {
                     do {
                         // serverHostname = nil porque conectamos por IP.
                         let tls = try NIOSSLClientHandler(context: sslContext, serverHostname: nil)
-                        return channel.pipeline.addHandlers([tls, InboundHandler(self)])
+                        // syncOperations: ya estamos en el event loop del canal (evita el aviso de Sendable).
+                        try channel.pipeline.syncOperations.addHandlers([tls, InboundHandler(self)])
+                        return channel.eventLoop.makeSucceededFuture(())
                     } catch {
                         return channel.eventLoop.makeFailedFuture(error)
                     }

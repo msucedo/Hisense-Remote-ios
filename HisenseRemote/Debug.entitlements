@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Solo Debug. En el simulador de iOS 26, storekitd rechaza SKTestSession
+	     ("is not installed for development") si la app no trae get-task-allow. -->
+	<key>get-task-allow</key>
+	<true/>
+</dict>
+</plist>

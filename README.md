@@ -67,7 +67,7 @@ prueba comprar, desbloquear y reembolsar.
 ### Probar desde la terminal
 
 ```bash
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift build
+DEVELOPER_DIR="/Applications/Copia de Xcode.app/Contents/Developer" swift build   # Xcode 26
 .build/debug/hisensectl scan                    # encuentra la tele
 .build/debug/hisensectl ping <ip>               # comprueba la conexión
 .build/debug/hisensectl pair <ip>               # empareja con el PIN
